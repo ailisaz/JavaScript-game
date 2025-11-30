@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>登录验证码功能演示</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+		}
+		
+		body {
+			background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+			min-height: 100vh;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			padding: 20px;
+		}
+		
+		.container {
+			display: flex;
+			max-width: 1000px;
+			width: 100%;
+			background: white;
+			border-radius: 15px;
+			overflow: hidden;
+			box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+		}
+		
+		.left-panel {
+			flex: 1;
+			background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+			color: white;
+			padding: 40px;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+		}
+		
+		.right-panel {
+			flex: 1;
+			padding: 40px;
+		}
+		
+		h1 {
+			font-size: 28px;
+			margin-bottom: 10px;
+		}
+		
+		.subtitle {
+			font-size: 16px;
+			opacity: 0.8;
+			margin-bottom: 30px;
+		}
+		
+		.feature-list {
+			list-style: none;
+			margin-top: 30px;
+		}
+		
+		.feature-list li {
+			margin-bottom: 15px;
+			display: flex;
+			align-items: center;
+		}
+		
+		.feature-list li::before {
+			content: "✓";
+			display: inline-block;
+			width: 24px;
+			height: 24px;
+			background: rgba(255, 255, 255, 0.2);
+			border-radius: 50%;
+			text-align: center;
+			line-height: 24px;
+			margin-right: 10px;
+		}
+		
+		.login-form {
+			display: flex;
+			flex-direction: column;
+		}
+		
+		.form-group {
+			margin-bottom: 20px;
+		}
+		
+		label {
+			display: block;
+			margin-bottom: 8px;
+			font-weight: 500;
+			color: #333;
+		}
+		
+		input {
+			width: 100%;
+			padding: 12px 15px;
+			border: 1px solid #ddd;
+			border-radius: 8px;
+			font-size: 16px;
+			transition: all 0.3s;
+		}
+		
+		input:focus {
+			border-color: #6a11cb;
+			box-shadow: 0 0 0 2px rgba(106, 17, 203, 0.2);
+			outline: none;
+		}
+		
+		.code-group {
+			display: flex;
+			gap: 10px;
+		}
+		
+		.code-input {
+			flex: 1;
+		}
+		
+		.send-btn {
+			padding: 12px 20px;
+			background: #6a11cb;
+			color: white;
+			border: none;
+			border-radius: 8px;
+			cursor: pointer;
+			font-weight: 500;
+			transition: all 0.3s;
+			white-space: nowrap;
+		}
+		
+		.send-btn:hover {
+			background: #5a0db5;
+		}
+		
+		.send-btn:disabled {
+			background: #ccc;
+			cursor: not-allowed;
+		}
+		
+		.login-btn {
+			padding: 14px;
+			background: #6a11cb;
+			color: white;
+			border: none;
+			border-radius: 8px;
+			font-size: 16px;
+			font-weight: 500;
+			cursor: pointer;
+			transition: all 0.3s;
+			margin-top: 10px;
+		}
+		
+		.login-btn:hover {
+			background: #5a0db5;
+		}
+		
+		.process-container {
+			margin-top: 40px;
+			background: #f8f9fa;
+			border-radius: 10px;
+			padding: 20px;
+		}
+		
+		.process-title {
+			font-size: 18px;
+			margin-bottom: 15px;
+			color: #333;
+		}
+		
+		.process-steps {
+			display: flex;
+			flex-direction: column;
+			gap: 15px;
+		}
+		
+		.step {
+			display: flex;
+			align-items: center;
+			padding: 10px;
+			background: white;
+			border-radius: 8px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+		}
+		
+		.step-number {
+			width: 30px;
+			height: 30px;
+			background: #6a11cb;
+			color: white;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin-right: 15px;
+			font-weight: bold;
+		}
+		
+		.step.active .step-number {
+			background: #2575fc;
+			animation: pulse 1.5s infinite;
+		}
+		
+		.step.completed .step-number {
+			background: #4CAF50;
+		}
+		
+		@keyframes pulse {
+			0% {
+				box-shadow: 0 0 0 0 rgba(37, 117, 252, 0.7);
+			}
+			70% {
+				box-shadow: 0 0 0 10px rgba(37, 117, 252, 0);
+			}
+			100% {
+				box-shadow: 0 0 0 0 rgba(37, 117, 252, 0);
+			}
+		}
+		
+		.code-display {
+			margin-top: 20px;
+			padding: 15px;
+			background: #f0f8ff;
+			border-radius: 8px;
+			border-left: 4px solid #2575fc;
+			display: none;
+		}
+		
+		.code-display.show {
+			display: block;
+			animation: fadeIn 0.5s;
+		}
+		
+		@keyframes fadeIn {
+			from { opacity: 0; }
+			to { opacity: 1; }
+		}
+		
+		@media (max-width: 768px) {
+			.container {
+				flex-direction: column;
+			}
+			
+			.left-panel {
+				padding: 30px 20px;
+			}
+			
+			.right-panel {
+				padding: 30px 20px;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="left-panel">
+			<h1>验证码登录系统</h1>
+			<p class="subtitle">安全便捷的身份验证方式</p>
+			
+			<ul class="feature-list">
+				<li>一键发送验证码到邮箱</li>
+				<li>60秒内有效，保障安全</li>
+				<li>无需记忆复杂密码</li>
+				<li>防止暴力破解攻击</li>
+			</ul>
+		</div>
+		
+		<div class="right-panel">
+			<h2>登录您的账户</h2>
+			<p class="subtitle">输入邮箱获取验证码</p>
+			
+			<form class="login-form" id="loginForm">
+				<div class="form-group">
+					<label for="email">邮箱地址</label>
+					<input type="email" id="email" placeholder="请输入您的邮箱" required>
+				</div>
+				
+				<div class="form-group">
+					<label for="code">验证码</label>
+					<div class="code-group">
+						<input type="text" id="code" class="code-input" placeholder="请输入6位验证码" maxlength="6" required>
+						<button type="button" class="send-btn" id="sendBtn">发送验证码</button>
+					</div>
+				</div>
+				
+				<button type="submit" class="login-btn">登录</button>
+			</form>
+			
+			<div class="code-display" id="codeDisplay">
+				<strong>演示说明：</strong> 
+				<span id="demoCode"></span> 
+				<br><br>
+				<small>在实际应用中，此验证码会通过邮件系统发送到您的邮箱。</small>
+			</div>
+			
+			<div class="process-container">
+				<h3 class="process-title">验证码发送流程</h3>
+				<div class="process-steps">
+					<div class="step active" id="step1">
+						<div class="step-number">1</div>
+						<div>用户输入邮箱并点击发送验证码</div>
+					</div>
+					<div class="step" id="step2">
+						<div class="step-number">2</div>
+						<div>系统生成随机验证码并存储</div>
+					</div>
+					<div class="step" id="step3">
+						<div class="step-number">3</div>
+						<div>调用邮件服务发送验证码到用户邮箱</div>
+					</div>
+					<div class="step" id="step4">
+						<div class="step-number">4</div>
+						<div>用户输入验证码完成验证</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+		const emailInput = document.getElementById('email');
+		const codeInput = document.getElementById('code');
+		const sendBtn = document.getElementById('sendBtn');
+		const loginForm = document.getElementById('loginForm');
+		const codeDisplay = document.getElementById('codeDisplay');
+		const demoCode = document.getElementById('demoCode');
+		
+		let countdown = 0;
+		let timer = null;
+		
+		// 发送验证码按钮点击事件
+		sendBtn.addEventListener('click', async function() {
+			const email = emailInput.value.trim();
+			
+			if (!email) {
+				alert('请输入邮箱地址');
+				return;
+			}
+			
+			if (!validateEmail(email)) {
+				alert('请输入有效的邮箱地址');
+				return;
+			}
+			
+			if (countdown > 0) return;
+			
+			// 禁用按钮防止重复点击
+			sendBtn.disabled = true;
+			sendBtn.textContent = '发送中...';
+			
+			try {
+				// 调用后端API发送验证码
+				const response = await fetch('/api/send-verification-code', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ email: email })
+				});
+				
+				const result = await response.json();
+				
+				if (result.success) {
+					// 更新UI显示发送成功
+					startSendingProcess(email);
+				} else {
+					throw new Error(result.message || '发送失败');
+				}
+				
+			} catch (error) {
+				console.error('发送验证码失败:', error);
+				alert(error.message || '发送失败，请重试');
+				sendBtn.disabled = false;
+				sendBtn.textContent = '发送验证码';
+			}
+		});
+		
+		// 登录表单提交事件
+		loginForm.addEventListener('submit', async function(e) {
+			e.preventDefault();
+			
+			const email = emailInput.value.trim();
+			const code = codeInput.value.trim();
+			
+			if (!email || !code) {
+				alert('请填写邮箱和验证码');
+				return;
+			}
+			
+			// 调用后端验证验证码
+			const isValid = await verifyCodeWithBackend(email, code);
+			
+			if (isValid) {
+				alert('验证成功！');
+				resetProcess();
+			} else {
+				alert('验证码错误或已过期，请重新输入');
+			}
+		});
+		
+		// 验证邮箱格式
+		function validateEmail(email) {
+			const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			return re.test(email);
+		}
+		
+		// 开始发送验证码流程
+		function startSendingProcess(email) {
+			// 步骤1已完成，激活步骤2
+			document.getElementById('step1').classList.add('completed');
+			document.getElementById('step2').classList.add('active');
+			
+			setTimeout(() => {
+				// 步骤2已完成，激活步骤3
+				document.getElementById('step2').classList.remove('active');
+				document.getElementById('step2').classList.add('completed');
+				document.getElementById('step3').classList.add('active');
+				
+				setTimeout(() => {
+					// 步骤3已完成，激活步骤4
+					document.getElementById('step3').classList.remove('active');
+					document.getElementById('step3').classList.add('completed');
+					document.getElementById('step4').classList.add('active');
+					
+					// 显示成功信息
+					demoCode.textContent = `验证码已发送到您的邮箱：${email}，请查收邮件并输入验证码。`;
+					codeDisplay.classList.add('show');
+					
+					// 开始倒计时
+					startCountdown();
+				}, 1000);
+			}, 1000);
+		}
+		
+		// 开始倒计时
+		function startCountdown() {
+			countdown = 60;
+			sendBtn.disabled = true;
+			
+			timer = setInterval(() => {
+				countdown--;
+				sendBtn.textContent = `${countdown}秒后重新发送`;
+				
+				if (countdown <= 0) {
+					clearInterval(timer);
+					sendBtn.textContent = '发送验证码';
+					sendBtn.disabled = false;
+				}
+			}, 1000);
+		}
+		
+		// 重置流程
+		function resetProcess() {
+			clearInterval(timer);
+			countdown = 0;
+			sendBtn.textContent = '发送验证码';
+			sendBtn.disabled = false;
+			codeDisplay.classList.remove('show');
+			
+			// 重置步骤状态
+			const steps = ['step1', 'step2', 'step3', 'step4'];
+			steps.forEach(step => {
+				const element = document.getElementById(step);
+				element.classList.remove('active', 'completed');
+			});
+			document.getElementById('step1').classList.add('active');
+		}
+		
+		// 调用后端验证验证码
+		async function verifyCodeWithBackend(email, code) {
+			try {
+				const response = await fetch('/api/verify-code', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ 
+						email: email, 
+						code: code 
+					})
+				});
+				
+				const result = await response.json();
+				return result.success;
+			} catch (error) {
+				console.error('验证验证码失败:', error);
+				return false;
+			}
+		}
+	});
+	</script>
+</body>
+</html>
